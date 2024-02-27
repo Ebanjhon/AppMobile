@@ -7,8 +7,11 @@ export const endpoints = {
     'current_user': '/User/current_user/',
     'study_class': (userId) => `/User/${userId}/get_studyclass/`,// có thể đặt tên khác với api đan g được gọi nhưng, chú ý đối số
     'scores': (resultId) => `/StudyClass/${resultId}/get_student_results/`,
-    'post': (classId) => `StudyClass/${classId}/get_post/`,
-    'postDetail': (postId) => `/Post/${postId}/get_comments/`
+    'post': (classId) => `/StudyClass/${classId}/get_post/`,
+    'postDetail': (postId) => `/Post/${postId}/get_comments/`,
+    'cmt_add': (postId) => `/Post/${postId}/add_comment/`,
+    'reply_add': (cmtPrent) => `/Comments/${cmtPrent}/add_reply/`,
+    'add_post': (classId) => `/StudyClass/${classId}/add_post/`,
 
 }
 

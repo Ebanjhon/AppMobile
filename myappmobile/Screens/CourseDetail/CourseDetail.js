@@ -1,13 +1,13 @@
-import { SafeAreaView, View, Text, FlatList, TouchableHighlight, Button, ActivityIndicator, ScrollView, } from "react-native"
+import { SafeAreaView, View, Text, FlatList, Modal, TextInput, TouchableHighlight, Button, ActivityIndicator, ScrollView, } from "react-native"
 import MyStyle from "../../MyStyles/MyStyle"
 import CorsDetailStyles from "./CorsDetailStyles";
 import { StyleSheet } from "react-native";
-// import LinearGradient from "react-native-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useContext, useEffect, useState } from "react";
-import API, { endpoints } from "../../config/API";
+import API, { endpoints, authApi } from "../../config/API";
 import MyConText from "../../config/MyConText";
 
 
@@ -18,49 +18,103 @@ const Course = ({ navigation, route }) => {
     const [scores, setScores] = useState(null)
     const [loading, setLoading] = useState(false);
     const [posts, setPosts] = useState(null)
+    // các thông tin sau khi nhập nội dung
+    const [modalVisible, setModalVisible] = useState(false);
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
 
-    // const handlePress = () => {
-    //     let url = (endpoints['scores'](classStudyId));
-    //     url = `${url}?student_id=${user.id}`
-    //     console.log(url);
-    // };
+    // lấy dữ liệu bai viết 
+    const loadPost = async () => {
+        try {
+            let res = await API.get((endpoints['post'](classStudyId)))
+            setPosts(res.data)
+            // console.log(posts)
+        } catch (err) {
+            console.error(err)
+        }
+    }
 
     // gọi api lấy dữ liệu
+    const loadScores = async () => {// lấy danh sách điểm
+        let url = (endpoints['scores'](classStudyId));
+
+        url = `${url}?student_id=${user.id}`
+        // console.log(url);
+        try {
+            let res = await API.get(url);
+            setScores(res.data)
+            // console.log(scores)
+        } catch (ex) {
+            console.error("lỗi: ", ex)
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // api tạo post 
+    const createPost = async () => {
+        try {
+            let token = await AsyncStorage.getItem('access_token');
+            let res = await authApi(token).post(endpoints['add_post'](classStudyId), { content, title });
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setModalVisible(false);
+            loadPost()
+            setContent('')
+            setTitle('')
+        }
+    };
 
     useEffect(() => {
         setLoading(true);
-        // handlePress()
-        const loadScores = async () => {// lấy danh sách điểm
-            let url = (endpoints['scores'](classStudyId));
-
-            url = `${url}?student_id=${user.id}`
-            // console.log(url);
-            try {
-                let res = await API.get(url);
-                setScores(res.data)
-                // console.log(scores)
-            } catch (ex) {
-                console.error("lỗi: ", ex)
-            } finally {
-                setLoading(false);
-            }
-        }
-        loadScores()
-
-        const loadPost = async () => {
-            try {
-                let res = await API.get((endpoints['post'](classStudyId)))
-                setPosts(res.data)
-                // console.log(posts)
-            } catch (err) {
-                console.error(err)
-            }
-        }
+        loadScores();
         loadPost()
     }, [classStudyId])
 
     return (
         <View style={{ width: '100%', height: '100%' }}>
+            {/* box để nhập thông tin  */}
+            <Modal
+                animationType="slide"
+                transparent={false}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(false);
+                }}
+            >
+                <View style={{ marginTop: 0, backgroundColor: '#034078', height: '100%' }}>
+                    <View style={CorsDetailStyles.content_input}>
+                        <Text style={styles.headerText}>Nhập tiêu đề:</Text>
+                        <TextInput
+                            onChangeText={text => setTitle(text)}
+                            value={title}
+                            placeholder="Nhập tiêu đề..."
+                            style={CorsDetailStyles.txtTitle}
+                        />
+                        <Text style={styles.headerText}>Nhập nội dung:</Text>
+                        <TextInput
+                            onChangeText={text => setContent(text)}
+                            value={content}
+                            placeholder="Nhập nội dung..."
+                            multiline={true}
+                            style={CorsDetailStyles.txtcontent}
+                            numberOfLines={4}
+                        />
+                    </View>
+                    <View style={CorsDetailStyles.but_add_content}>
+                        <TouchableHighlight onPress={() => setModalVisible(false)}
+                            style={[CorsDetailStyles.but_add, CorsDetailStyles.cancel]}>
+                            <Text style={CorsDetailStyles.txt_OK_Cancel}>Hủy</Text>
+                        </TouchableHighlight>
+                        <TouchableHighlight onPress={createPost}
+                            style={[CorsDetailStyles.but_add, CorsDetailStyles.ok]}>
+                            <Text style={CorsDetailStyles.txt_OK_Cancel}>Đăng bài</Text>
+                        </TouchableHighlight>
+                    </View>
+                </View>
+            </Modal>
+
             {/* danh sách điểm */}
             <View style={[styles.container]}>
                 <View style={{ width: '90%' }}>
@@ -104,9 +158,20 @@ const Course = ({ navigation, route }) => {
             </View >
             {/* phần list diễn đàn */}
             < View style={{ width: '100%', alignItems: 'center' }}>
+                {/* // phần thêm diễn đàn */}
                 <Text style={styles.headerText}>Diễn đàn</Text>
+
+                <View style={CorsDetailStyles.button}>
+                    <TouchableOpacity style={CorsDetailStyles.but} onPress={() => setModalVisible(true)}>
+                        <Text style={CorsDetailStyles.text_button}>
+                            Thêm bài viết...
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+
                 {/* items diễn đàn */}
-                <View style={{ height: "80%" }}>
+                <View style={{ height: '100%', width: '100%' }}>
                     <FlatList
                         data={posts}
                         style={{ width: '100%' }}
@@ -125,13 +190,13 @@ const Course = ({ navigation, route }) => {
                                                 borderWidth: 2, // Độ dày của đường viền
                                                 borderColor: 'black', // Màu sắc của đường viền
                                                 padding: 5,
-                                                borderRadius: 10
-
+                                                borderRadius: 10,
+                                                width: '100%'
                                             }}
                                         >
                                             <View style={{ flexDirection: 'row' }}>
-                                                <Text style={styles.title}>Admin: Jhon </Text>
-                                                <Text style={[{ marginLeft: 10 }, styles.title]}>MSSV: 123</Text>
+                                                <Text style={styles.title}>{item.user_post.role}: {item.user_post.username} </Text>
+                                                <Text style={[{ marginLeft: 10 }, styles.title]}>MSSV: {item.user_post.id_user}</Text>
                                             </View>
                                             <Text style={styles.title}>Tiêu đề: {item.title}</Text>
                                             <Text style={styles.text_post}>Nội dung: {item.content} </Text>

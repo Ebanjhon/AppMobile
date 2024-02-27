@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react"
-import { SafeAreaView, ScrollView, View, Text, TextInput, TouchableOpacity, Button } from "react-native"
+import { SafeAreaView, ScrollView, View, Text, TextInput, TouchableOpacity, Button, Image } from "react-native"
 import RegisterStyles from "./RegisterStyles";
 import DatePicker from "react-native-datepicker";
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -22,6 +22,7 @@ const Register = ({ navigation }) => {
     const [birth_date, setBirtdate] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [user, dispatch] = useContext(MyConText)
+    const [image, setImage] = useState(null);
     const handleDateChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
         setShowDatePicker(false);
@@ -33,11 +34,9 @@ const Register = ({ navigation }) => {
         const year = date.getFullYear();
         let month = date.getMonth() + 1;
         let day = date.getDate();
-
         // Thêm số 0 vào trước tháng và ngày nếu cần
         month = month < 10 ? '0' + month : month;
         day = day < 10 ? '0' + day : day;
-
         return `${year}-${month}-${day}`;
     }
     // thực hiện lấy thông tin và token
@@ -194,6 +193,14 @@ const Register = ({ navigation }) => {
                             placeholder="password"
                             secureTextEntry={true}
                         />
+                    </View>
+
+                    <View style={RegisterStyles.form_input}>
+                        <View style={RegisterStyles.title_view}>
+                            <Text style={RegisterStyles.title_text}>Mật khẩu</Text>
+                        </View>
+                        {image && <Image source={{ uri: image.uri }} style={{ width: 200, height: 200 }} />}
+                        <Button title="Chọn hình ảnh" onPress={handleChoosePhoto} />
                     </View>
 
                     <TouchableOpacity style={RegisterStyles.button} onPress={handlePress}>

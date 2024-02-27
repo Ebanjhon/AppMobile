@@ -12,7 +12,7 @@ export default StyleSheet.create({
     form_input: {
         width: '100%',
         alignItems: 'center',
-        paddingBottom: 20,
+        paddingBottom: 10,
 
     },
     input: {
@@ -40,6 +40,4 @@ export default StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     }
-
-
 });

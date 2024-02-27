@@ -18,6 +18,8 @@ import {
 } from 'react-native';
 import MyConText from "../../config/MyConText";
 import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 
 const Login = ({ navigation }) => {
@@ -51,11 +53,17 @@ const Login = ({ navigation }) => {
             });
             const data = await response.json();
             let user = await authApi(data.access_token).get(endpoints['current_user']);
+            // lưu token vào bộ nhớ thiết bị
+            try {
+                await AsyncStorage.setItem('access_token', data.access_token);
+                console.log('Đã lưu tên thành công vào AsyncStorage');
+            } catch (error) {
+                console.error('Lỗi khi lưu tên vào AsyncStorage:', error);
+            }
             dispatch({
                 type: "login",
                 payload: user.data
             });
-            // console.log(user.data)
             navigation.navigate('Nav')
         } catch (error) {
 
@@ -68,13 +76,13 @@ const Login = ({ navigation }) => {
         }
     };
 
-    useFocusEffect(
-        React.useCallback(() => {
-            if (user && (user.id !== 0)) {
-                navigation.navigate('Nav');
-            }
-        })
-    );
+    // useFocusEffect(
+    //     React.useCallback(() => {
+    //         if (user && (user.id !== 0)) {
+    //             navigation.navigate('Nav');
+    //         }
+    //     })
+    // );
 
     return (
         <SafeAreaView style={LoginStyles.container}>
