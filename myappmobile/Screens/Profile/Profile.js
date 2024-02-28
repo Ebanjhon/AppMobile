@@ -18,7 +18,7 @@ const Profile = ({ navigation }) => {
 
     return (
         <SafeAreaView style={MyStyle.topbar}>
-            <View style={[{ width: '100%', height: 100 }]}>
+            <View style={[{ width: '100%', height: '100%', backgroundColor: '#2F514B' }]}>
                 <View style={ProfileStyles.viewbox}>
                     <Image
                         source={user.avatar ? { uri: HOST + user.avatar } : { uri: 'https://i.vietgiaitri.com/2018/10/9/hinh-anh-minion-ngo-nghinh-de-thuong-dang-yeu-doc-dao-hai-huoc-022394.jpg' }}

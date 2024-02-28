@@ -19,6 +19,7 @@ import {
 import MyConText from "../../config/MyConText";
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 
 
@@ -76,13 +77,13 @@ const Login = ({ navigation }) => {
         }
     };
 
-    // useFocusEffect(
-    //     React.useCallback(() => {
-    //         if (user && (user.id !== 0)) {
-    //             navigation.navigate('Nav');
-    //         }
-    //     })
-    // );
+    useFocusEffect(
+        React.useCallback(() => {
+            if (user && (user.id !== 0)) {
+                navigation.navigate('Nav');
+            }
+        })
+    );
 
     return (
         <SafeAreaView style={LoginStyles.container}>
@@ -93,7 +94,8 @@ const Login = ({ navigation }) => {
                         source={{ uri: 'https://avatarfiles.alphacoders.com/294/294021.jpg' }}
                     />
                     <Text style={[LoginStyles.text, { fontSize: 30 }]}>LOGIN</Text>
-                    <View style={{ width: '100%', height: '20%', justifyContent: "space-around", alignItems: 'center', margin: 10 }}>
+                    <View style={{ width: '100%', height: 110, justifyContent: "space-between", alignItems: 'center', margin: 10 }}>
+                        {/* <Icon name="user" size={20} color="#000" style={{ marginRight: 10 }} /> */}
                         <TextInput
                             style={LoginStyles.input}
                             onChangeText={setUsername}
@@ -115,7 +117,7 @@ const Login = ({ navigation }) => {
                         <TouchableOpacity style={LoginStyles.button}
                             onPress={handleGetToken}
                         >
-                            <Text style={{ fontSize: 20 }} >Đăng nhập</Text>
+                            <Text style={LoginStyles.login_txt} >Đăng nhập</Text>
                         </TouchableOpacity>
                     </>}
 

@@ -7,7 +7,6 @@ export default StyleSheet.create({
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        // backgroundColor: 'red'
     },
     form_input: {
         width: '100%',

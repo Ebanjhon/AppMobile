@@ -59,7 +59,7 @@ const Home = ({ route, navigation }) => {
 
                     <View style={{ marginLeft: 10 }}>
                         <Text style={HomeStyles.text_name}>Hello {user.first_name} {user.last_name}</Text>
-                        <Text>{user.role}</Text>
+                        <Text style={{ color: '#446645', fontWeight: '500' }}>{user.role}</Text>
                     </View>
                     <View>
 

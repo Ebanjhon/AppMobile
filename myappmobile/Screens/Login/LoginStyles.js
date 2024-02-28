@@ -47,16 +47,31 @@ export default StyleSheet.create({
     },
     button: {
         alignItems: 'center',
-        backgroundColor: '#DDDDDD',
+        backgroundColor: '#406E49',
         padding: 18,
-        width: '100%'
+        width: '100%',
+        borderRadius: 50,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 50,
     },
     input: {
         width: '100%',
-        height: 40,
-        borderWidth: 1,
-        borderColor: '#ccc',
+        height: 50,
+        borderWidth: 2,
+        borderColor: '#1F3524',
         padding: 10,
+        backgroundColor: '#D2DDD5',
+        borderRadius: 10,
+        shadowColor: 'black',
+        fontSize: 20,
+        fontWeight: '700',
+        color: "#1F3D29",
     },
+    login_txt: {
+        fontSize: 25,
+        fontWeight: '700',
+        color: "#F5F5F5"
+    }
 
 });

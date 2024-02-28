@@ -9,7 +9,8 @@ export default StyleSheet.create({
     viewbox: {
         // flex: 1,
         alignItems: 'center',
-        backgroundColor: '#ffffff',
+        backgroundColor: '#E3E3E3',
+        // height
     },
     avatar: {
         width: 150,
@@ -27,8 +28,8 @@ export default StyleSheet.create({
         marginBottom: 10,
     },
     div_info: {
-        // backgroundColor: '#50C4ED',
-        width: '80%',
+        backgroundColor: '#E7EDEC',
+        width: '90%',
         height: 50,
         borderRadius: 100,
         justifyContent: 'center',

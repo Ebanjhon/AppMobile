@@ -19,7 +19,7 @@ export default StyleSheet.create({
     body: {
         width: '100%',
         height: 'auto',
-        backgroundColor: '#C7C8CC',
+        backgroundColor: '#E8E9ED',
         padding: 5
     },
     img: {
@@ -27,26 +27,29 @@ export default StyleSheet.create({
         height: 80,
         borderRadius: 100,
         marginLeft: 10,
-
     },
     text_name: {
         fontSize: 20,
-        fontWeight: '600'
+        fontWeight: '600',
+        color: '#3D6F49'
     },
     txt: {
         fontSize: 20,
         fontWeight: '600'
     },
     img_course: {
-        width: 100, height: 100
+        width: 100, height: 100,
+        borderRadius: 5
     },
     view_course: {
         flexDirection: 'row',
-        margin: 10,
-
+        margin: 5,
+        backgroundColor: '#F5F5F5',
+        padding: 10,
+        borderRadius: 5
     },
     title_course: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: '500'
     },
     title_class: {

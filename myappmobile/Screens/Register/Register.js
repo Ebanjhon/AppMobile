@@ -7,6 +7,11 @@ import axios, { Axios } from "axios";
 import API, { authApi, endpoints } from "../../config/API";
 import { encode as base64encode } from 'base-64'; // Import hàm encode từ thư viện base-64
 import MyConText from "../../config/MyConText";
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+
+
+
 const Register = ({ navigation }) => {
 
     const [grantType, setGrantType] = useState('password');
@@ -22,7 +27,9 @@ const Register = ({ navigation }) => {
     const [birth_date, setBirtdate] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [user, dispatch] = useContext(MyConText)
-    const [image, setImage] = useState(null);
+    const [avatar, setAvatar] = useState();
+    const [upload_avatar, setUploadAvatar] = useState();
+
     const handleDateChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
         setShowDatePicker(false);
@@ -68,22 +75,51 @@ const Register = ({ navigation }) => {
         }
     };
 
+    // thực hiện chuyển đổi ảnh
+    const imageToBase64 = async (imageUri) => {
+        try {
+            // Đọc nội dung của tệp hình ảnh
+            let response = await FileSystem.readAsStringAsync(imageUri, {
+                encoding: FileSystem.EncodingType.Base64,
+            });
+            // Trả về dữ liệu base64
+            // console.log(response)
+            return response;
+        } catch (error) {
+            console.error("Error converting image to base64:", error);
+            return null;
+        }
+    };
+
+    // thực hiện lấy ảnh
+    const pickImage = async () => {
+        let { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+        if (status !== 'granted') {
+            alert("Permissions denied!");
+        } else {
+            const result = await ImagePicker.launchImageLibraryAsync();
+            if (!result.canceled) {// nếu không bấm cancel
+                setAvatar(result.assets[0]);
+                console.log(result.assets[0])
+                setUploadAvatar(avatar);
+            }
+        }
+    }
 
     // thuc hiện gửi request đăng ký
     const handlePress = async () => {
         try {
-            setBirtdate(formatDate(date))
             const response = await fetch('https://nmau4669.pythonanywhere.com/User/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password, email, address, birth_date, first_name, last_name }),
+                body: JSON.stringify({ username, password, email, address, first_name, last_name }),
             });
             if (!response.ok) {
                 throw new Error(response.status);
             }
-            // Registration successful, you may redirect the user or show a success message
             console.log('Registration successful');
             getToken(grantType, clientId, clientSecret, username, password);
         } catch (error) {
@@ -96,7 +132,7 @@ const Register = ({ navigation }) => {
             <ScrollView>
                 <View style={RegisterStyles.container}>
 
-                    <Text style={{ fontWeight: '800', fontSize: 45, paddingTop: 20 }}>WELLCOME</Text>
+                    <Text style={{ fontWeight: '800', fontSize: 45 }}>WELLCOME</Text>
 
                     <View style={RegisterStyles.form_input}>
                         <View style={RegisterStyles.title_view}>
@@ -195,15 +231,12 @@ const Register = ({ navigation }) => {
                         />
                     </View>
 
-                    <View style={RegisterStyles.form_input}>
-                        <View style={RegisterStyles.title_view}>
-                            <Text style={RegisterStyles.title_text}>Mật khẩu</Text>
-                        </View>
-                        {image && <Image source={{ uri: image.uri }} style={{ width: 200, height: 200 }} />}
-                        <Button title="Chọn hình ảnh" onPress={handleChoosePhoto} />
+                    <View style={[RegisterStyles.form_input, { flexDirection: 'row', justifyContent: 'space-evenly' }]}>
+                        <Button title="Chọn ảnh..." onPress={pickImage} />
+                        {avatar ? <Image source={{ uri: avatar.uri }} style={{ width: 100, height: 100 }} /> : ""}
                     </View>
 
-                    <TouchableOpacity style={RegisterStyles.button} onPress={handlePress}>
+                    <TouchableOpacity style={[RegisterStyles.button, { marginBottom: 100 }]} onPress={handlePress}>
                         <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff' }}>Đăng Ký</Text>
                     </TouchableOpacity>
 
