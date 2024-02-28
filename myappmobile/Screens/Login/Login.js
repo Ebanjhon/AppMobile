@@ -57,7 +57,7 @@ const Login = ({ navigation }) => {
             // lưu token vào bộ nhớ thiết bị
             try {
                 await AsyncStorage.setItem('access_token', data.access_token);
-                console.log('Đã lưu tên thành công vào AsyncStorage');
+                // console.log('Đã lưu tên thành công vào AsyncStorage');
             } catch (error) {
                 console.error('Lỗi khi lưu tên vào AsyncStorage:', error);
             }

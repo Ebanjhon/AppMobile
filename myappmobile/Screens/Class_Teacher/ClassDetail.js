@@ -1,6 +1,5 @@
 import { SafeAreaView, View, Text, FlatList, Modal, TextInput, TouchableHighlight, Button, ActivityIndicator, ScrollView, } from "react-native"
 import MyStyle from "../../MyStyles/MyStyle"
-import CorsDetailStyles from "./CorsDetailStyles";
 import { StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -9,9 +8,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useContext, useEffect, useState } from "react";
 import API, { endpoints, authApi } from "../../config/API";
 import MyConText from "../../config/MyConText";
+import ClassStyles from "./ClassStyles";
+import AddScores from "../InoutScores/InputScores";
 
 
-const Course = ({ navigation, route }) => {
+const ClassDetail = ({ navigation, route }) => {
 
     const { classStudyId } = route.params; //dùng để chứa id lớp học
     const [user, dispatch] = useContext(MyConText)
@@ -23,12 +24,6 @@ const Course = ({ navigation, route }) => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
 
-    const Scoresdefault = {
-        midterm_score: '0',
-        final_score: '0',
-        score_columns: []
-    };
-
     // lấy dữ liệu bai viết 
     const loadPost = async () => {
         try {
@@ -39,24 +34,6 @@ const Course = ({ navigation, route }) => {
             console.error(err)
         }
     }
-
-    // gọi api lấy dữ liệu lấy danh sách điểm
-    const loadScores = async () => {
-        let url = (endpoints['scores'](classStudyId));
-
-        url = `${url}?student_id=${user.id}`
-        // console.log(url);
-        try {
-            let res = await API.get(url);
-            { res.data.length === 0 ? setScores(Scoresdefault) : res.data.is_draft === true ? setScores(Scoresdefault) : setScores(res.data) }
-            // setScores(res.data)
-            console.log(scores[0].midterm_score)
-        } catch (ex) {
-            console.error("lỗi: ", ex)
-        } finally {
-            setLoading(false);
-        }
-    };
 
     // api tạo post 
     const createPost = async () => {
@@ -74,8 +51,6 @@ const Course = ({ navigation, route }) => {
     };
 
     useEffect(() => {
-        setLoading(true);
-        loadScores();
         loadPost()
     }, [classStudyId])
 
@@ -91,13 +66,13 @@ const Course = ({ navigation, route }) => {
                 }}
             >
                 <View style={{ marginTop: 0, backgroundColor: '#034078', height: '100%' }}>
-                    <View style={CorsDetailStyles.content_input}>
+                    <View style={ClassStyles.content_input}>
                         <Text style={styles.headerText}>Nhập tiêu đề:</Text>
                         <TextInput
                             onChangeText={text => setTitle(text)}
                             value={title}
                             placeholder="Nhập tiêu đề..."
-                            style={CorsDetailStyles.txtTitle}
+                            style={ClassStyles.txtTitle}
                         />
                         <Text style={styles.headerText}>Nhập nội dung:</Text>
                         <TextInput
@@ -105,18 +80,18 @@ const Course = ({ navigation, route }) => {
                             value={content}
                             placeholder="Nhập nội dung..."
                             multiline={true}
-                            style={CorsDetailStyles.txtcontent}
+                            style={ClassStyles.txtcontent}
                             numberOfLines={4}
                         />
                     </View>
-                    <View style={CorsDetailStyles.but_add_content}>
+                    <View style={ClassStyles.but_add_content}>
                         <TouchableHighlight onPress={() => setModalVisible(false)}
-                            style={[CorsDetailStyles.but_add, CorsDetailStyles.cancel]}>
-                            <Text style={CorsDetailStyles.txt_OK_Cancel}>Hủy</Text>
+                            style={[ClassStyles.but_add, ClassStyles.cancel]}>
+                            <Text style={ClassStyles.txt_OK_Cancel}>Hủy</Text>
                         </TouchableHighlight>
                         <TouchableHighlight onPress={createPost}
-                            style={[CorsDetailStyles.but_add, CorsDetailStyles.ok]}>
-                            <Text style={CorsDetailStyles.txt_OK_Cancel}>Đăng bài</Text>
+                            style={[ClassStyles.but_add, ClassStyles.ok]}>
+                            <Text style={ClassStyles.txt_OK_Cancel}>Đăng bài</Text>
                         </TouchableHighlight>
                     </View>
                 </View>
@@ -124,43 +99,14 @@ const Course = ({ navigation, route }) => {
 
             {/* danh sách điểm */}
             <View style={[styles.container]}>
-                <View style={{ width: '90%' }}>
-                    <View style={[styles.header]}>
-                        <Text style={styles.headerText}>Cột điểm</Text>
-                        <Text style={styles.headerText}>Điểm số</Text>
-                    </View>
-                    <View style={{ paddingLeft: 10, paddingRight: 10 }}>
-                        <View style={[styles.row]}>
-                            <Text style={styles.cell}>Cuối kỳ</Text>
-                            {/* <Text style={styles.cell}>{scores === undefined ? scores[0].final_score : scores[0].final_score}</Text> */}
-                        </View>
-                        <View style={[styles.row]}>
-                            <Text style={styles.cell}>Giữa kỳ</Text>
-                            {/* <Text style={styles.cell}>{scores === undefined ? scores[0].midterm_score : scores.midterm_score}</Text> */}
-                        </View>
-                    </View>
+                <View style={ClassStyles.view_info_class}>
+                    <TouchableHighlight style={ClassStyles.button_add_score}>
+                        <Text style={ClassStyles.but_text}>Xem danh sách sinh viên</Text>
+                    </TouchableHighlight>
 
-                    {loading === true ? <ActivityIndicator /> : <>
-                        <FlatList
-                            data={scores}
-                            keyExtractor={(item, index) => index.toString()}
-                            renderItem={({ item }) => (
-                                <View style={{ padding: 10, paddingTop: 0, borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
-                                    {/* cot diem cong */}
-                                    <FlatList
-                                        data={item.score_columns}
-                                        keyExtractor={(item, index) => index.toString()}
-                                        renderItem={({ item }) => (
-                                            <View style={[styles.row]}>
-                                                <Text style={styles.cell}>{item.name_column}</Text>
-                                                <Text style={styles.cell}>{item.result_learning}</Text>
-                                            </View>
-                                        )}
-                                    />
-                                </View>
-                            )}
-                        />
-                    </>}
+                    <TouchableHighlight style={ClassStyles.button_add_score} onPress={() => navigation.navigate('AddScores', { 'classStudyId': classStudyId })}>
+                        <Text style={ClassStyles.but_text}>Nhập điểm sinh viên</Text>
+                    </TouchableHighlight>
                 </View>
             </View >
             {/* phần list diễn đàn */}
@@ -168,9 +114,9 @@ const Course = ({ navigation, route }) => {
                 {/* // phần thêm diễn đàn */}
                 <Text style={styles.headerText}>Diễn đàn</Text>
 
-                <View style={CorsDetailStyles.button}>
-                    <TouchableOpacity style={CorsDetailStyles.but} onPress={() => setModalVisible(true)}>
-                        <Text style={CorsDetailStyles.text_button}>
+                <View style={ClassStyles.button}>
+                    <TouchableOpacity style={ClassStyles.but} onPress={() => setModalVisible(true)}>
+                        <Text style={ClassStyles.text_button}>
                             Thêm bài viết...
                         </Text>
                     </TouchableOpacity>
@@ -185,7 +131,7 @@ const Course = ({ navigation, route }) => {
                         renderItem={({ item }) => (
                             <TouchableHighlight onPress={() => navigation.navigate('Post', { 'postid': item })}>
                                 <View style={styles.post}>
-                                    <GestureHandlerRootView style={{ width: '100%', height: 100, }}>
+                                    <GestureHandlerRootView style={{ width: '100%', height: 100 }}>
                                         <LinearGradient
                                             colors={['#F2EFE5', '#B4B4B8']}
                                             start={{ x: 0.2, y: 5 }} // Điểm bắt đầu của gradient
@@ -224,10 +170,11 @@ const styles = StyleSheet.create({
         paddingRight: 16,
         paddingLeft: 16,
         width: '100%',
-        height: '29%',
+        height: '20%',
         minHeight: 100,
         alignContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        backgroundColor: 'grey'
     },
     header: {
         flexDirection: 'row',
@@ -269,4 +216,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default Course
+export default ClassDetail

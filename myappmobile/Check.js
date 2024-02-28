@@ -1,99 +1,173 @@
-import React, { useState } from 'react';
-import { View, Button, Image, StyleSheet } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import axios from 'axios';
-import crypto from 'crypto-js';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TextInput, Button, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import InputScoreStyles from './InputScoreStyles';
+import API, { authApi, endpoints } from '../../config/API';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const App = () => {
-    const [image, setImage] = useState();
+export default function AddScores({ route }) {
+    const [students, setStudents] = useState([]);
+    const [scoreColumns, setScoreColumns] = useState([
+        { column_name: 'midterm_score', scores: [] },
+        { column_name: 'final_score', scores: [] },
+    ]);
+    const { classStudyId } = route.params;
+    const [loading, setLoading] = useState(false)
 
-    const pickImage = async () => {
-        let { status } = await ImagePicker.requestCameraPermissionsAsync();
+    // thực hiện lấy dánh sách sinh viên 
+    useEffect(() => {
+        const fetchStudents = async () => {
+            setLoading(true)
+            try {
+                // let url = API.get(endpoints['get_list_student'](7));
+                const response = await API.get(endpoints['get_list_student'](classStudyId));
+                console.log(response.data);
+                setStudents(response.data.map(student => ({
+                    ...student,
+                    scores: new Array(scoreColumns.length).fill(''), // Khởi tạo mỗi sinh viên với số lượng điểm tương ứng với số cột
+                })));
 
-        if (status !== 'granted') {
-            alert("Permissions denied!");
-        } else {
-            const result = await ImagePicker.launchImageLibraryAsync();
-            if (!result.cancelled) {
-                setImage(result.assets[0]);
-                uploadImage(result.assets[0]);
+            } catch (ex) {
+                console.error("lỗi ", ex);
+            } finally {
+                setLoading(false)
             }
         }
-    }
+        fetchStudents();
+    }, [classStudyId]);
 
-    const uploadImage = async (photo) => {
-        const formData = new FormData();
-        formData.append('file', {
-            uri: photo.uri,
-            type: 'image/jpeg', // hoặc 'image/png' tùy vào định dạng của ảnh
-            name: 'photo.jpg',
-        });
-        formData.append('upload_preset', 'din9naro'); // Thay thế YOUR_UPLOAD_PRESET bằng upload preset của bạn trên Cloudinary
-
-        try {
-            const response = await axios.post(
-                'https://api.cloudinary.com/v1_1/drosiimsz/image/upload', // Thay thế YOUR_CLOUD_NAME bằng tên cloud của bạn trên Cloudinary
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'Authorization': 'Bearer ' + generateToken()
-                    }
-                }
-            );
-            console.log('Upload successful: ', response.data);
-        } catch (error) {
-            console.error('Upload failed: ', error);
+    // thực hiện thêm cột điểm 
+    const handleAddColumn = () => {
+        if (scoreColumns.length < 5) {
+            const newColumn = { column_name: '', scores: students.map(() => '') };
+            setScoreColumns([...scoreColumns, newColumn]);
+            setStudents(students.map(student => ({
+                ...student,
+                scores: [...student.scores, ''], // Thêm giá trị điểm rỗng cho cột mới của mỗi sinh viên
+            })));
+        } else {
+            Alert.alert('Thông báo', 'Khóa học chỉ cho phép giáo viên thêm tối đa 5 cột điểm!');
         }
     };
 
-    const generateToken = () => {
-        const timestamp = Math.floor(Date.now() / 1000);
-        const apiKey = '789493436969451'; // Thay thế YOUR_API_KEY bằng API key của bạn từ tài khoản Cloudinary
-        const apiSecret = '18lxkfupfx2p4EoBZl7H7e-wdGk'; // Thay thế YOUR_API_SECRET bằng API secret của bạn từ tài khoản Cloudinary
-        const signature = crypto.HmacSHA1('timestamp=' + timestamp, apiSecret).toString();
-        return apiKey + ':' + timestamp + ':' + signature;
+    const handleColumnNameChange = (columnIndex, value) => {
+        const updatedColumns = [...scoreColumns];
+        updatedColumns[columnIndex].column_name = value;
+        setScoreColumns(updatedColumns);
+    };
+
+
+    const handleChangeScore = (studentId, columnIndex, value) => {
+        if (value.length > 3) {
+            return; // Không cập nhật nếu độ dài vượt quá 3
+        }
+        let formattedValue = value.replace(/[^0-9.]/g, '');
+        // Giới hạn độ dài của chuỗi là 3
+        formattedValue = formattedValue.slice(0, 3);
+        setStudents(students.map(student =>
+            student.id === studentId ? {
+                ...student,
+                scores: student.scores.map((score, idx) => idx === columnIndex ? value : score),
+            } : student,
+        ));
+    };
+
+    // thực hiện chức năng lưu điểm nháp 
+    const handleSubmit = async () => {
+        const formattedData = students.map(student => {
+            const scoresData = {
+                student_id: student.id, // Đảm bảo sử dụng đúng trường ID của sinh viên
+                midterm_score: parseFloat(student.scores[0]) || 0, // Chỉ định rõ ràng đây là điểm giữa kỳ
+                final_score: parseFloat(student.scores[1]) || 0, // Chỉ định rõ ràng đây là điểm cuối kỳ
+                score_columns: []
+            };
+            // Lặp qua các cột điểm bổ sung từ thứ 2 trở đi
+            for (let i = 2; i < student.scores.length; i++) {
+                scoresData.score_columns.push({
+                    column_name: scoreColumns[i].column_name, // Lấy tên cột điểm từ mảng scoreColumns
+                    score: parseFloat(student.scores[i]) || 0 // Chuyển đổi điểm số sang dạng số và sử dụng 0 nếu không hợp lệ
+                });
+            }
+            return scoresData;
+        });
+        // console.log('Sending data:', JSON.stringify({ scores: formattedData }));
+        try {
+            let token = await AsyncStorage.getItem('access_token');
+            let res = await authApi(token).post(endpoints['add_scores'](classStudyId), { scores: formattedData });
+            Alert.alert('Success', 'Scores submitted successfully');
+        } catch (error) {
+            console.error(error)
+            Alert.alert('Error', error.message);
+        }
+    };
+
+    // thực hiện chức năng khóa điểm 
+    const lockScores = async () => {
+        try {
+            console.log(endpoints['lock_scores'](classStudyId));
+            let token = await AsyncStorage.getItem('access_token');
+            let res = await authApi(token).post(endpoints['lock_scores'](classStudyId), { active: 'false' });
+            Alert.alert('Success', 'Đã khóa điểm!');
+        } catch (error) {
+            console.error(error)
+            Alert.alert('Error', error.message);
+        }
     };
 
     return (
-        <View style={styles.container}>
-            <Button title="Take a Photo" onPress={pickImage} />
+        <ScrollView contentContainerStyle={styles.container}>
+            <Text style={styles.title}>Danh Sách Sinh Viên</Text>
+            <Button style={styles.btnAddScore} title="Thêm cột điểm" onPress={handleAddColumn} />
 
-            {image && <Image source={{ uri: image.uri }} style={{ width: 10, height: 10 }} />}
-        </View >
+            {scoreColumns.map((column, columnIndex) => (
+                <TextInput
+                    key={columnIndex}
+                    style={styles.input}
+                    value={column.column_name}
+                    onChangeText={(value) => handleColumnNameChange(columnIndex, value)}
+                    placeholder={`Nhập tên cột số ${columnIndex + 1}`}
+                />
+            ))}
+            {students.map((student, index) => (
+                <View key={student.id} style={styles.studentContainer}>
+                    <Text style={InputScoreStyles.nameStudent}>{`${student.first_name} ${student.last_name}`}</Text>
+                    {student.scores.map((score, columnIndex) => (
+                        <TextInput
+                            key={columnIndex}
+                            style={styles.input}
+                            value={score}
+                            onChangeText={(value) => handleChangeScore(student.id, columnIndex, value)}
+                            placeholder={scoreColumns[columnIndex]?.column_name || `Cột số ${columnIndex + 1}`}
+                            keyboardType="numeric"
+                        />
+                    ))}
+                </View>
+            ))}
+            <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
+                <Text style={InputScoreStyles.Txt_But}>Lưu thay đổi</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={lockScores} style={styles.submitButton}>
+                <Text style={InputScoreStyles.Txt_But}>Khóa điểm</Text>
+            </TouchableOpacity>
+        </ScrollView >
     );
-};
+}
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff',
+
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
     },
-    image: {
-        width: 200,
-        height: 200,
+    container: {
+        paddingLeft: 50,
+        paddingRight: 50,
+    },
+    studentContainer: { marginBottom: 20 },
+    input: { height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10, padding: 10 },
+    submitButton: { backgroundColor: 'blue', padding: 10, marginTop: 20, alignItems: 'center' },
+    btnAddScore: {
         marginBottom: 20,
     },
 });
-
-export default App;
-
-
-
-
-const imageToBase64 = async (imageUri) => {
-    try {
-        // Đọc nội dung của tệp hình ảnh
-        let response = await FileSystem.readAsStringAsync(imageUri, {
-            encoding: FileSystem.EncodingType.Base64,
-        });
-        // Trả về dữ liệu base64
-        console.log(response)
-        return response;
-    } catch (error) {
-        console.error("Error converting image to base64:", error);
-        return null;
-    }
-};

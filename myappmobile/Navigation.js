@@ -8,11 +8,12 @@ import Profile from "./Screens/Profile/Profile"
 import Register from "./Screens/Register/Register";
 import Post from "./Screens/PostDetail/Post"
 import Course from "./Screens/CourseDetail/CourseDetail";
-
+import ClassDetail from "./Screens/Class_Teacher/ClassDetail";
 import { FontAwesome5, Entypo, FontAwesome } from '@expo/vector-icons';
 import React, { createContext, useReducer, useState } from "react";
 import userReducer from "./config/MyUserReducer";
 import MyConText from "./config/MyConText";
+import AddScores from "./Screens/InoutScores/InputScores";
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator()
 
@@ -23,7 +24,9 @@ function StackGroup() {
         <Stack.Navigator initialRouteName="Home">
             <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
             <Stack.Screen name="Course" component={Course} />
+            <Stack.Screen name="ClassDetail" component={ClassDetail} />
             <Stack.Screen name="Post" component={Post} />
+            <Stack.Screen name="AddScores" component={AddScores} />
         </Stack.Navigator>
     )
 }

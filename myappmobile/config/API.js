@@ -12,7 +12,10 @@ export const endpoints = {
     'cmt_add': (postId) => `/Post/${postId}/add_comment/`,
     'reply_add': (cmtPrent) => `/Comments/${cmtPrent}/add_reply/`,
     'add_post': (classId) => `/StudyClass/${classId}/add_post/`,
-
+    'get_list_student': (classId) => `/StudyClass/${classId}/get_list_student_results/`,
+    'add_scores': (classId) => `/StudyClass/${classId}/input_scores/`,
+    'lock_scores': (classId) => `/StudyClass/${classId}/finalize_scores/`,
+    'get_scores': (classId) => `/StudyClass/${classId}/get_result_learning/`,
 }
 
 

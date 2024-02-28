@@ -38,13 +38,13 @@ const Home = ({ route, navigation }) => {
                 setClassStudy(res.data)
                 // console.log(classStydy)
             } catch (ex) {
-                console.error(ex);
+                console.error('123');
             } finally {
                 setLoading(false)
             }
         }
         loadClass();
-    }, [])
+    }, []);
 
     return (
         <SafeAreaView style={MyStyle.topbar}>
@@ -72,13 +72,18 @@ const Home = ({ route, navigation }) => {
                         style={HomeStyles.body}
                         ListHeaderComponent={
                             <View>
-                                <Text style={HomeStyles.text_name}>Danh sách các lớp học:</Text>
+                                {user.role === 'teacher' ?
+                                    <Text style={HomeStyles.text_name}>Danh sách các lớp dạy:</Text>
+                                    :
+                                    <Text style={HomeStyles.text_name}>Danh sách các lớp học:</Text>
+                                }
                             </View>
 
                         }
                         data={classStydy}
                         renderItem={({ item }) => (
-                            <TouchableOpacity onPress={() => navigation.navigate('Course', { 'classStudyId': item.id })}>
+                            // <TouchableOpacity onPress={() => navigation.navigate('Course', { 'classStudyId': item.id })}>
+                            <TouchableOpacity onPress={() => { user.role === 'teacher' ? navigation.navigate('ClassDetail', { 'classStudyId': item.id }) : navigation.navigate('Course', { 'classStudyId': item.id }) }}>
                                 <View style={HomeStyles.view_course}>
 
                                     <Image
@@ -86,7 +91,7 @@ const Home = ({ route, navigation }) => {
                                         source={item.course.image ? { uri: HOST + item.course.image } : { uri: 'https://i.pinimg.com/564x/03/e6/ec/03e6ec49164bb4a8586d862345eae049.jpg' }}
                                     />
                                     <View style={HomeStyles.title_view}>
-                                        <Text style={HomeStyles.title_course}>{item.name}</Text>
+                                        <Text style={HomeStyles.title_course}>Lớp: {item.name}</Text>
                                         <Text style={HomeStyles.title_class}>Môn: {item.course.name}</Text>
                                         <Text style={HomeStyles.title_class}>Mã môn học: {item.id}</Text>
                                         <Text style={HomeStyles.title_class}>Học kỳ: {item.semester.schoolyear}</Text>
