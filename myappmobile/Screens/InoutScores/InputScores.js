@@ -12,31 +12,28 @@ export default function AddScores({ route }) {
     ]);
     const { classStudyId } = route.params;
     const [loading, setLoading] = useState(false)
-    const [apiScores, setApiScores] = useState([]);
 
     // thực hiện lấy dánh sách sinh viên 
     useEffect(() => {
-        const fetchStudentsAndScores = async () => {
-            setLoading(true);
+        const fetchStudents = async () => {
+            setLoading(true)
             try {
+                // let url = API.get(endpoints['get_list_student'](7));
                 const response = await API.get(endpoints['get_list_student'](classStudyId));
+                console.log(response.data);
                 setStudents(response.data.map(student => ({
                     ...student,
-                    scores: new Array(scoreColumns.length).fill(''),
+                    scores: new Array(scoreColumns.length).fill(''), // Khởi tạo mỗi sinh viên với số lượng điểm tương ứng với số cột
                 })));
 
-                // Lấy điểm từ API và cập nhật state apiScores
-                const scoresResponse = await API.get(endpoints['get_scores'](classStudyId));
-                setApiScores(scoresResponse.data);
             } catch (ex) {
                 console.error("lỗi ", ex);
             } finally {
-                setLoading(false);
+                setLoading(false)
             }
         }
-        fetchStudentsAndScores();
+        fetchStudents();
     }, [classStudyId]);
-
 
     // thực hiện thêm cột điểm 
     const handleAddColumn = () => {
@@ -74,7 +71,7 @@ export default function AddScores({ route }) {
         ));
     };
 
-    // thực hiện chức năng lưu điểm
+    // thực hiện chức năng lưu điểm nháp 
     const handleSubmit = async () => {
         const formattedData = students.map(student => {
             const scoresData = {
@@ -102,7 +99,8 @@ export default function AddScores({ route }) {
             Alert.alert('Error', error.message);
         }
     };
-    // thực hiện chức năng khóa điểm
+
+    // thực hiện chức năng khóa điểm 
     const lockScores = async () => {
         try {
             console.log(endpoints['lock_scores'](classStudyId));
@@ -132,33 +130,15 @@ export default function AddScores({ route }) {
             {students.map((student, index) => (
                 <View key={student.id} style={styles.studentContainer}>
                     <Text style={InputScoreStyles.nameStudent}>{`${student.first_name} ${student.last_name}`}</Text>
-                    {student.results.map((result, resultIndex) => (
-                        <View key={resultIndex}>
-                            <TextInput
-                                style={styles.input}
-                                value={result.midterm_score.toString()} // Hiển thị điểm giữa kỳ
-                                onChangeText={(value) => handleChangeScore(student.id, 0, value)}
-                                placeholder="Điểm giữa kỳ"
-                                keyboardType="numeric"
-                            />
-                            <TextInput
-                                style={styles.input}
-                                value={result.final_score.toString()} // Hiển thị điểm cuối kỳ
-                                onChangeText={(value) => handleChangeScore(student.id, 1, value)}
-                                placeholder="Điểm cuối kỳ"
-                                keyboardType="numeric"
-                            />
-                            {result.score_columns.map((column, columnIndex) => (
-                                <TextInput
-                                    key={columnIndex}
-                                    style={styles.input}
-                                    value={column.score.toString()} // Hiển thị điểm của các cột điểm bổ sung
-                                    onChangeText={(value) => handleChangeScore(student.id, columnIndex + 2, value)}
-                                    placeholder={column.name_column}
-                                    keyboardType="numeric"
-                                />
-                            ))}
-                        </View>
+                    {student.scores.map((score, columnIndex) => (
+                        <TextInput
+                            key={columnIndex}
+                            style={styles.input}
+                            value={score}
+                            onChangeText={(value) => handleChangeScore(student.id, columnIndex, value)}
+                            placeholder={scoreColumns[columnIndex]?.column_name || `Cột số ${columnIndex + 1}`}
+                            keyboardType="numeric"
+                        />
                     ))}
                 </View>
             ))}

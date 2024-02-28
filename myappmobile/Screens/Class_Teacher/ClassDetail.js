@@ -100,7 +100,7 @@ const ClassDetail = ({ navigation, route }) => {
             {/* danh sách điểm */}
             <View style={[styles.container]}>
                 <View style={ClassStyles.view_info_class}>
-                    <TouchableHighlight style={ClassStyles.button_add_score}>
+                    <TouchableHighlight style={ClassStyles.button_add_score} onPress={() => navigation.navigate('ShowListStudent')}>
                         <Text style={ClassStyles.but_text}>Xem danh sách sinh viên</Text>
                     </TouchableHighlight>
 

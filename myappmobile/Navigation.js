@@ -14,6 +14,7 @@ import React, { createContext, useReducer, useState } from "react";
 import userReducer from "./config/MyUserReducer";
 import MyConText from "./config/MyConText";
 import AddScores from "./Screens/InoutScores/InputScores";
+import ShowListStudent from "./Screens/ShowListStudent/ShowList";
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator()
 
@@ -27,6 +28,7 @@ function StackGroup() {
             <Stack.Screen name="ClassDetail" component={ClassDetail} />
             <Stack.Screen name="Post" component={Post} />
             <Stack.Screen name="AddScores" component={AddScores} />
+            <Stack.Screen name="ShowListStudent" component={ShowListStudent} />
         </Stack.Navigator>
     )
 }

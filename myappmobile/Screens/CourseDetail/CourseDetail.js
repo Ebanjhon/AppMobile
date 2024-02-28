@@ -23,12 +23,6 @@ const Course = ({ navigation, route }) => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
 
-    const Scoresdefault = {
-        midterm_score: '0',
-        final_score: '0',
-        score_columns: []
-    };
-
     // lấy dữ liệu bai viết 
     const loadPost = async () => {
         try {
@@ -48,9 +42,8 @@ const Course = ({ navigation, route }) => {
         // console.log(url);
         try {
             let res = await API.get(url);
-            { res.data.length === 0 ? setScores(Scoresdefault) : res.data.is_draft === true ? setScores(Scoresdefault) : setScores(res.data) }
-            // setScores(res.data)
-            console.log(scores[0].midterm_score)
+            setScores(res.data)
+            console.log(scores[0])
         } catch (ex) {
             console.error("lỗi: ", ex)
         } finally {
