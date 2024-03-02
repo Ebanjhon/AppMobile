@@ -19,7 +19,6 @@ import {
 import MyConText from "../../config/MyConText";
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Icon from 'react-native-vector-icons/FontAwesome';
 
 
 
@@ -91,7 +90,7 @@ const Login = ({ navigation }) => {
                 <View style={LoginStyles.form}>
                     <Image
                         style={LoginStyles.img}
-                        source={{ uri: 'https://avatarfiles.alphacoders.com/294/294021.jpg' }}
+                        source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Logo_DH_M%E1%BB%9F_TPHCM.png' }}
                     />
                     <Text style={[LoginStyles.text, { fontSize: 30 }]}>LOGIN</Text>
                     <View style={{ width: '100%', height: 110, justifyContent: "space-between", alignItems: 'center', margin: 10 }}>

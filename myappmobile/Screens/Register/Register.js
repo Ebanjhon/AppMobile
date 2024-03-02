@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react"
-import { SafeAreaView, ScrollView, View, Text, TextInput, TouchableOpacity, Button, Image } from "react-native"
+import { SafeAreaView, ScrollView, View, Text, TextInput, TouchableOpacity, Button, Image, Alert } from "react-native"
 import RegisterStyles from "./RegisterStyles";
 import DatePicker from "react-native-datepicker";
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -107,24 +107,36 @@ const Register = ({ navigation }) => {
         }
     }
 
+    function isValidEmail(email) {
+        // Sử dụng biểu thức chính quy để so khớp mẫu của email
+        const emailPattern = /@ou\.edu\.vn$/;
+        return emailPattern.test(email);
+    }
+
     // thuc hiện gửi request đăng ký
     const handlePress = async () => {
-        try {
-            const response = await fetch('https://nmau4669.pythonanywhere.com/User/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password, email, address, first_name, last_name }),
-            });
-            if (!response.ok) {
-                throw new Error(response.status);
+        if (avatar == null)
+            Alert.alert('Thông báo!', 'Vui lòng chọn ảnh để đăng ký!', [{ text: 'Ok' }])
+        else if (!isValidEmail(email)) {
+            Alert.alert('Thông báo!', 'Email bạn nhập không phải email của trường',
+                [{ text: 'Ok', onPress: () => console.log('alert colesd') }])
+        } else {
+            try {
+                const response = await fetch('https://nmau4669.pythonanywhere.com/User/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password, email, address, first_name, last_name, avatar: avatar.uri }),
+                });
+
+                console.log('Registration successful');
+                getToken(grantType, clientId, clientSecret, username, password);
+            } catch (error) {
+                console.error(error)
             }
-            console.log('Registration successful');
-            getToken(grantType, clientId, clientSecret, username, password);
-        } catch (error) {
-            console.error(error)
         }
+
     };
 
     return (

@@ -24,11 +24,11 @@ function StackGroup() {
     return (
         <Stack.Navigator initialRouteName="Home">
             <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
-            <Stack.Screen name="Course" component={Course} />
-            <Stack.Screen name="ClassDetail" component={ClassDetail} />
-            <Stack.Screen name="Post" component={Post} />
-            <Stack.Screen name="AddScores" component={AddScores} />
-            <Stack.Screen name="ShowListStudent" component={ShowListStudent} />
+            <Stack.Screen name="Course" component={Course} options={{ title: 'Lớp học' }} />
+            <Stack.Screen name="ClassDetail" component={ClassDetail} options={{ title: 'Lớp học' }} />
+            <Stack.Screen name="Post" component={Post} options={{ title: 'Diễn đàn' }} />
+            <Stack.Screen name="AddScores" component={AddScores} options={{ title: 'Nhập điểm sinh viên' }} />
+            <Stack.Screen name="ShowListStudent" component={ShowListStudent} options={{ title: 'Danh sách lớp' }} />
         </Stack.Navigator>
     )
 }

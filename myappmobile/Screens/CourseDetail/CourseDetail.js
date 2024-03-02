@@ -23,6 +23,13 @@ const Course = ({ navigation, route }) => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
 
+
+    useEffect(() => {
+        if (scores && scores.length > 0) {
+            console.log("Scores loaded:", scores[0]);
+        }
+    }, [scores]); // Phụ thuộc vào scores để chạy lại mỗi khi scores thay đổi
+
     // lấy dữ liệu bai viết 
     const loadPost = async () => {
         try {
@@ -36,18 +43,15 @@ const Course = ({ navigation, route }) => {
 
     // gọi api lấy dữ liệu lấy danh sách điểm
     const loadScores = async () => {
-        let url = (endpoints['scores'](classStudyId));
-
-        url = `${url}?student_id=${user.id}`
-        // console.log(url);
+        setLoading(true); // Bắt đầu tải dữ liệu
+        let url = endpoints['scores'](classStudyId) + `?student_id=${user.id}`;
         try {
             let res = await API.get(url);
-            setScores(res.data)
-            console.log(scores[0])
+            setScores(res.data);
         } catch (ex) {
-            console.error("lỗi: ", ex)
+            console.error("lỗi: ", ex);
         } finally {
-            setLoading(false);
+            setLoading(false); // Kết thúc tải dữ liệu
         }
     };
 
@@ -67,10 +71,11 @@ const Course = ({ navigation, route }) => {
     };
 
     useEffect(() => {
-        setLoading(true);
+        setLoading(true); // Bắt đầu tải tất cả dữ liệu
         loadScores();
-        loadPost()
-    }, [classStudyId])
+        loadPost();
+        // Không cần đặt setLoading(false) ở đây vì nó đã được gọi trong finally của cả hai hàm
+    }, [classStudyId]);
 
     return (
         <View style={{ width: '100%', height: '100%' }}>
@@ -125,11 +130,11 @@ const Course = ({ navigation, route }) => {
                     <View style={{ paddingLeft: 10, paddingRight: 10 }}>
                         <View style={[styles.row]}>
                             <Text style={styles.cell}>Cuối kỳ</Text>
-                            {/* <Text style={styles.cell}>{scores === undefined ? scores[0].final_score : scores[0].final_score}</Text> */}
+                            <Text style={styles.cell}>{scores && scores.length > 0 ? scores[0].final_score : 'Chưa có điểm chính thức'}</Text>
                         </View>
                         <View style={[styles.row]}>
                             <Text style={styles.cell}>Giữa kỳ</Text>
-                            {/* <Text style={styles.cell}>{scores === undefined ? scores[0].midterm_score : scores.midterm_score}</Text> */}
+                            <Text style={styles.cell}>{scores && scores.length > 0 ? scores[0].midterm_score : 'Chưa có điểm chính thức'}</Text>
                         </View>
                     </View>
 
@@ -146,7 +151,7 @@ const Course = ({ navigation, route }) => {
                                         renderItem={({ item }) => (
                                             <View style={[styles.row]}>
                                                 <Text style={styles.cell}>{item.name_column}</Text>
-                                                <Text style={styles.cell}>{item.result_learning}</Text>
+                                                <Text style={styles.cell}>{item.score}</Text>
                                             </View>
                                         )}
                                     />
